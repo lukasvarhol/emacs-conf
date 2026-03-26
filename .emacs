@@ -1,6 +1,5 @@
-;; emacs config file
+;;; package -- Summary:
 
-;; Get Melpa package manager
 (require 'package)
 
 (add-to-list 'package-archives
@@ -9,11 +8,13 @@
 
 (package-initialize)
 
-;; Auto-generated config settings will be saved here:
 (setq custom-file "~/.emacs.custom.el")
+(setq default-frame-alist '((font . "Iosevka-15")
+			    (width . 120)
+			    (height . 30)
+			    (top . 50)
+			    (left . 100)))
 
-;; Basic config
-(add-to-list 'default-frame-alist `(font . "Iosevka-15"))
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
@@ -22,7 +23,6 @@
 (load-file custom-file)
 
 (setq ring-bell-function 'ignore)
-
 ;; Built-in diagnostics UI
 (add-hook 'prog-mode-hook #'flymake-mode)
 
@@ -49,6 +49,11 @@
 (vhdl-ext-mode-setup)
 (vhdl-ext-eglot-set-server 've-rust-hdl)
 
+;; CMake files
+(require 'cmake-mode)
+(add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
+(add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
+
 ;; Start Eglot automatically
 (add-hook 'java-mode-hook #'eglot-ensure)
 (add-hook 'c-mode-hook #'eglot-ensure)
@@ -59,11 +64,16 @@
 (add-hook 'verilog-mode-hook #'eglot-ensure)
 
 (add-to-list 'auto-mode-alist '("\\.sv\\'" . verilog-mode))
-(add-to-list 'auto-mode-alist '("\\.svh\\'" . verilog-mode))
+(add-to-list 'auto-mode-alist '("\\.svh\\'" . verilogs-mode))
 (add-to-list 'auto-mode-alist '("\\.v\\'" . verilog-mode))
 (add-to-list 'auto-mode-alist '("\\.vh\\'" . verilog-mode))
 (add-to-list 'auto-mode-alist '("\\.vhd\\'" . vhdl-mode))
 (add-to-list 'auto-mode-alist '("\\.vhdl\\'" . vhdl-mode))
+
+(with-eval-after-load 'verilog-mode
+  (font-lock-add-keywords
+   'verilog-mode
+   '(("\\_<[A-Z][A-Z0-9_]*\\_>" . font-lock-constant-face))))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -73,17 +83,18 @@
   (add-to-list 'eglot-server-programs
                '(python-mode . ("basedpyright-langserver" "--stdio")))
   (add-to-list 'eglot-server-programs
-               '(cmake-mode . ("cmake-language-server")))
+               '(cmake-mode . ("cmake-language-server.exe")))
   (add-to-list 'eglot-server-programs
                '(verilog-mode . ("verible-verilog-ls.exe"))))
 
 (setq eglot-send-changes-idle-time 0.2)
 
-;; Error-line colors
+(setq verilog-linter "verible-verilog-lint")
 (custom-set-faces
  '(flymake-error ((t (:underline (:style wave :color "red")))))
  '(flymake-warning ((t (:underline (:style wave :color "yellow")))))
  '(flymake-note ((t (:underline (:style wave :color "forest green"))))))
+
 
 ;;; function to create a new python project
 (defun my-find-python-command ()
@@ -130,6 +141,7 @@
          "  \"typeCheckingMode\": \"basic\"\n"
          "}\n")))
 
+    ;; --- WINDOW SPLIT PART ---
     (split-window-below)
     (other-window 1)
 
